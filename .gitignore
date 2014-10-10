@@ -11,5 +11,9 @@
 .Rproj.user/
 .Rproj.user
 
+# Data folder
+data/*
+
 # Misc
 *.pptx
+

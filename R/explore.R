@@ -1,7 +1,7 @@
 # Set up
 rm(list=ls())
 source("./R/functions.R")
-f_install_and_load(c("e1071", "CRISP"))
+f_install_and_load(c("e1071", "crisp.data.package"))
 
 # Load data
 data(crisp.data)
