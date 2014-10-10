@@ -13,3 +13,6 @@
 
 # Misc
 *.pptx
+
+# Data
+data/*

@@ -1,7 +1,7 @@
 # Set up
 rm(list=ls())
-source("./R/functions.R")
-f_install_and_load(c("e1071", "CRISP"))
+source("functions.R")
+f_install_and_load(c("e1071", "crisp.data.package"))
 
 # Load data
 data(crisp.data)
@@ -18,7 +18,11 @@ for (eoi in cEOIs) {
 }
 
 system.time(
-  tune.out <- tune(svm, coup ~ ., data=coup[cTRAIN, ], kernel="radial",
-                 ranges = list(cost = c(0.1 ,1 ,10 ,100 ,1000),
-                               gamma = c(0.5 ,1 ,2 ,3 ,4)))
+  tune.out <- tune(svm, coup ~ ., data=coup[cTRAIN, ], kernel="radial", scale=TRUE,
+                 ranges = list(cost = c(10, 100),
+                               gamma = c(2, 3)))
 )
+summary(tune.out)
+
+# Predict
+table(true=coup[-cTRAIN, "y"], pred=predict(tune.out$best.model, newx=coup[-cTRAIN, ]))
