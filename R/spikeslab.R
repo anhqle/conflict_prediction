@@ -11,12 +11,18 @@ data(cutoffs)
 cTRAIN <- crisp.data$date <= cutoffs$trainingend
 cTEST <- crisp.data$date >= cutoffs$teststart
 
-# Create data frame with relevant features
+# Do it
 cEOIs <- c("insurgency", "rebellion", "dpc", "erv", "ic", "coup")
 for (eoi in cEOIs) {
-  f_prepData(crisp.data, eoi, hier=TRUE)
+  f_prepData(crisp.data, eoi, hier=TRUE) # Create data frame with relevant features
   formula <- paste(eoi, "~ .")
+  # Train the model
   assign(paste0("model_", eoi), spikeslab(formula, data=get(eoi)[cTRAIN, ]))
+  cat(eoi, "training done \n")
+  # Predict new value
   assign(paste0("pred_", eoi), predict(get(paste0("model_", eoi)), data=get(eoi)[cTEST, ]))
+  cat(eoi, "predicting done \n")
+
+  # Print precision and recall
   table(get(paste0("pred_", eoi))$yhat.gnet, get(eoi)[ , eoi])
 }
