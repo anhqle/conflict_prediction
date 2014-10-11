@@ -23,8 +23,14 @@ f_prepData <- function(data, eoi, header=NULL, wantedColPosition=NULL, hier=FALS
   # Rename first column
   assign(newDFName, setNames(get(newDFName), c(eoi, colnames(data[ , wantedColPosition]))), envir=.GlobalEnv)
 
+  # Convert integer to numeric
+  integerToNumeric <- function(d) {
+    modifyList(d, lapply(d[ , sapply(d, is.integer)], as.numeric))
+  }
+  assign(newDFName, integerToNumeric(get(newDFName)), envir=.GlobalEnv)
+
   if (hier == TRUE) {
-    data$country <- as.character(data$country)
+    data$country <- gsub(pattern=",", rep="_", as.character(data$country))
     country_vars <- c()
     i <- 1
     for (country in unique(data$country)) {
