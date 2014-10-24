@@ -17,7 +17,7 @@ tmp <- gsub("(?<=[AB])\\.", "..", tmp, perl=TRUE)
 tmp <- gsub("X61Z", "X61...Z", tmp, perl=TRUE)
 tmp <- gsub("ZF", "ZF...", tmp)
 
-tmp[!(tmp %in% names(crisp.data))]
+# tmp[!(tmp %in% names(crisp.data))]
 
 # Recode 0 to NA for all the var in tmp
 for (i in seq_along(missing_names)) {
@@ -27,6 +27,16 @@ for (i in seq_along(missing_names)) {
 }
 
 f_prepData(d, "dpc", hier=T)
+dpc <- dpc[, setdiff(names(dpc), tmp)]
 
-m_all <- svm(dpc ~ AG.LND.TOTL.K2, data=dpc[cTRAIN, ], kernel="radial", gamma=1, cost=1)
+m_all <- svm(dpc ~ ., data=dpc[cTRAIN, ], kernel="radial", gamma=1, cost=1)
+plot(m_all, d_train)
 
+tune_all <- tune(svm, dpc ~ ., data=dpc[cTRAIN, ], kernel="radial",
+                 ranges=list(cost=c(0.1, 1),
+                             gamma=c(0.5, 1))
+                 )
+summary(tune_all)
+
+table(true=dpc[-cTRAIN, dpc],
+      pred=predict(tune_all$best.model, newx=dpc[-cTRAIN, ]))
