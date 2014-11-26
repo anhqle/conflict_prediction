@@ -1,0 +1,164 @@
+
+R version 3.1.1 (2014-07-10) -- "Sock it to Me"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> rm(list=ls())
+> source("functions.R")
+> f_install_and_load(c("spikeSlabGAM", "crisp.data.package", "dplyr"))
+Loading required package: ggplot2
+Loading required package: lme4
+Loading required package: Matrix
+Loading required package: Rcpp
+Loading required package: RColorBrewer
+Loading required package: Hmisc
+Loading required package: grid
+Loading required package: lattice
+Loading required package: survival
+Loading required package: splines
+Loading required package: Formula
+
+Attaching package: ‘Hmisc’
+
+The following objects are masked from ‘package:base’:
+
+    format.pval, round.POSIXt, trunc.POSIXt, units
+
+Loading required package: maptools
+Loading required package: sp
+Checking rgeos availability: TRUE
+
+Attaching package: ‘maptools’
+
+The following object is masked from ‘package:Hmisc’:
+
+    label
+
+Loading required package: pscl
+Loading required package: MASS
+Classes and Methods for R developed in the
+
+Political Science Computational Laboratory
+
+Department of Political Science
+
+Stanford University
+
+Simon Jackman
+
+hurdle and zeroinfl functions by Achim Zeileis
+
+Loading required package: separationplot
+Loading required package: corpcor
+Loading required package: cshapes
+Loading required package: plyr
+
+Attaching package: ‘plyr’
+
+The following objects are masked from ‘package:Hmisc’:
+
+    is.discrete, summarize
+
+Loading required package: shape
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:plyr’:
+
+    arrange, desc, failwith, id, mutate, summarise, summarize
+
+The following object is masked from ‘package:MASS’:
+
+    select
+
+The following objects are masked from ‘package:Hmisc’:
+
+    src, summarize
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+[[1]]
+[1] "spikeSlabGAM" "ggplot2"      "stats"        "graphics"     "grDevices"   
+[6] "utils"        "datasets"     "methods"      "base"        
+
+[[2]]
+ [1] "crisp.data.package" "shape"              "cshapes"           
+ [4] "plyr"               "corpcor"            "separationplot"    
+ [7] "pscl"               "MASS"               "maptools"          
+[10] "sp"                 "Hmisc"              "Formula"           
+[13] "survival"           "splines"            "lattice"           
+[16] "grid"               "RColorBrewer"       "lme4"              
+[19] "Rcpp"               "Matrix"             "spikeSlabGAM"      
+[22] "ggplot2"            "stats"              "graphics"          
+[25] "grDevices"          "utils"              "datasets"          
+[28] "methods"            "base"              
+
+[[3]]
+ [1] "dplyr"              "crisp.data.package" "shape"             
+ [4] "cshapes"            "plyr"               "corpcor"           
+ [7] "separationplot"     "pscl"               "MASS"              
+[10] "maptools"           "sp"                 "Hmisc"             
+[13] "Formula"            "survival"           "splines"           
+[16] "lattice"            "grid"               "RColorBrewer"      
+[19] "lme4"               "Rcpp"               "Matrix"            
+[22] "spikeSlabGAM"       "ggplot2"            "stats"             
+[25] "graphics"           "grDevices"          "utils"             
+[28] "datasets"           "methods"            "base"              
+
+> 
+> # Load data
+> data(crisp.data)
+> data(cutoffs)
+> cTRAIN <- crisp.data$date <= cutoffs$trainingend
+> 
+> # Run MCMC
+> options(mc.cores=6)
+> mcmc <- list(nChains=8, chainLength=1000, burnin=500, thin=5)
+> 
+> cEOIs <- c("insurgency")
+> for (eoi in cEOIs) {
++   f_prepData(crisp.data, eoi, hier=FALSE) # Create data frame with relevant features
++   df <- get(eoi)
++ 
++ 
++   # Train the model
++   formula <- as.formula(paste(eoi, "~", paste(names(df)[-1], collapse=" + ")))
++   assign(paste0("model_", eoi), spikeSlabGAM(formula=formula,
++                                              family="binomial", data=df[cTRAIN, ],
++                                              mcmc=mcmc))
++   cat(eoi, "training done \n")
++   # Predict new value. Data for predict excludes response y
++   assign(paste0("pred_", eoi), predict(get(paste0("model_", eoi)),
++                                        newdata=df[-cTRAIN, ]))
++   cat(eoi, "predicting done \n")
++ 
++   # Print precision and recall
++   table(real=df[-cTRAIN, eoi], pred=as.numeric(paste0("pred_", eoi) >= 0.5))
++ }
+insurgency done 
+
+Model has  3225  coefficients in  823 model terms.
+Blockwise sampling: alpha: 165  block(s); xi: 242 block(s).
+
+starting chain(s):
+bbbbbbbb0------------------------------------------------------------------------------100%

@@ -1,7 +1,9 @@
 # Set up
 rm(list=ls())
-source("./R/functions.R")
+source("functions.R")
 f_install_and_load(c("crisp.data.package", "e1071"))
+
+start <- proc.time()
 
 data(crisp.data)
 data(cutoffs)
@@ -29,8 +31,11 @@ for (i in seq_along(missing_names)) {
 f_prepData(d, "dpc", hier=T)
 dpc <- dpc[, setdiff(names(dpc), tmp)]
 
+# Remove everything except dpc since for some reasons svm looks for X...SF object sth like that
+rm(list=(setdiff(ls(), c("dpc", "cTRAIN"))))
+
 m_all <- svm(dpc ~ ., data=dpc[cTRAIN, ], kernel="radial", gamma=1, cost=1)
-plot(m_all, d_train)
+plot(m_all, dpc[cTRAIN, ])
 
 tune_all <- tune(svm, dpc ~ ., data=dpc[cTRAIN, ], kernel="radial",
                  ranges=list(cost=c(0.1, 1),
@@ -38,5 +43,9 @@ tune_all <- tune(svm, dpc ~ ., data=dpc[cTRAIN, ], kernel="radial",
                  )
 summary(tune_all)
 
-table(true=dpc[-cTRAIN, dpc],
-      pred=predict(tune_all$best.model, newx=dpc[-cTRAIN, ]))
+# table(true=dpc[-cTRAIN, dpc],
+#      pred=predict(tune_all$best.model, newx=dpc[-cTRAIN, ]))
+
+save.image(file="svm_firstrun.RData")
+
+proc.time() - start
