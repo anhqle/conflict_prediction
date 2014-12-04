@@ -24,22 +24,22 @@ Res <- foreach (i=(1:length(cEOIs))) %dopar% {
 
   # Train the model
   formula <- paste(eoi, "~ .")
-  assign(paste0("m_", eoi), logit.spike(formula, data=get(eoi)[cTRAIN, ], niter=1000))
+  assign(paste0("m_", eoi), logit.spike(formula, data=get(eoi)[cTRAIN, ], niter=5000))
   cat(eoi, "training done \n")
 
   # Predict in of sample
   in_pred_prob <- apply(predict(get(paste0("m_", eoi)), newdata=get(eoi)[cTRAIN, ],
-                        burn=100, type="response", na.action=na.pass), 1, mean)
+                        burn=500, type="response", na.action=na.pass), 1, mean)
   cat(eoi, "in-sample predicting done \n")
 
   # Predict out of sample
   out_pred_prob <- apply(predict(get(paste0("m_", eoi)), newdata=get(eoi)[cTEST, ],
-                       burn=100, type="response", na.action=na.pass), 1, mean)
+                       burn=500, type="response", na.action=na.pass), 1, mean)
   cat(eoi, "out-sample predicting done \n")
 
   # Print precision and recall
-  in_true <- get(eoi)[cTRAIN, eoi]
-  out_true <- get(eoi)[cTEST, eoi]
+#   in_true <- get(eoi)[cTRAIN, eoi]
+#   out_true <- get(eoi)[cTEST, eoi]
 
   # table(true=true, pred=pred)
   # in_performance <- f_predictiveDiagnose(in_pred_prob, in_true)
