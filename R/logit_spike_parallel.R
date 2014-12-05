@@ -42,11 +42,6 @@ Res <- foreach (i=(1:length(cEOIs))) %dopar% {
   # in_true <- get(eoi)[cTRAIN, eoi]
   # out_true <- get(eoi)[cTEST, eoi]
 
-  # table(true=true, pred=pred)
-  # in_performance <- f_predictiveDiagnose(in_pred_prob, in_true)
-  # out_performance <- f_predictiveDiagnose(out_pred_prob, out_true)
-  # cat(eoi, "predictive diagnostic done \n")
-
   list(model=get(paste0("m_", eoi)))
 }
 
