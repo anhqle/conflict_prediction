@@ -5,6 +5,7 @@ if (Sys.getenv("LOGNAME") == "anh") {
 
 rm(list=ls())
 source("functions.R")
+source("logit_spike_constants.R")
 f_install_and_load(c("crisp.data.package", "BoomSpikeSlab", "doMC", "foreach"))
 
 data(crisp.data)
@@ -21,7 +22,6 @@ f_predict <- function(model, newdata, nburn) {
 }
 
 registerDoMC(min(detectCores()/2, length(Res)))
-niter <- 5000 ; nburn <- 500
 
 prediction <- foreach (i=(1:length(Res))) %dopar% {
   eoi <- names(Res)[i]

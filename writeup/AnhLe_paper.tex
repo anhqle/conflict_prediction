@@ -1,0 +1,79 @@
+\documentclass[12pt]{article}
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=1in]{geometry}  % set the margins to 1in on all sides
+\usepackage{graphicx}              % to include figures
+\usepackage{amsmath}               % great math stuff
+\usepackage{amsfonts}              % for blackboard bold, etc
+\usepackage{amsthm}                % better theorem environments
+
+\usepackage{rotating} % for sideway table
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+\usepackage{cleveref}
+
+\usepackage{array,tabularx}
+
+\newenvironment{conditions*}
+  {\par\vspace{\abovedisplayskip}\noindent
+   \tabularx{\columnwidth}{>{$}l<{$} @{${}={}$} >{\raggedright\arraybackslash}X}}
+  {\endtabularx\par\vspace{\belowdisplayskip}}
+  
+\usepackage{float}
+\restylefloat{table}
+
+% various theorems, numbered by section
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+
+\DeclareMathOperator{\id}{id}
+
+\newcommand{\bd}[1]{\mathbf{#1}}  % for bolding symbols
+\newcommand{\RR}{\mathbb{R}}      % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}}      % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+
+% bibliography
+\usepackage{natbib}
+\bibpunct{(}{)}{;}{a}{}{,} % no comma between author and year
+
+\title{Conflict Prediction with Spike and Slab prior}
+\author{Anh Le}
+
+\begin{document}
+\maketitle
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig/roc_insurgency}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig/roc_mp}
+\end{figure}
+
+\begin{table}
+\centering
+\input{fig/in_sample_performance}
+\caption{In-sample predictive performance}
+\end{table}
+
+\begin{table}
+\centering
+\input{fig/out_sample_performance}
+\caption{Out-sample predictive performance}
+\end{table}
+
+\end{document}

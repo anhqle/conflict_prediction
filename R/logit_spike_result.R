@@ -5,59 +5,50 @@ if (Sys.getenv("LOGNAME") == "anh") {
 
 rm(list=ls())
 source("functions.R")
+source("logit_spike_constants.R")
 f_install_and_load(c("crisp.data.package", "xtable", "ROCR", "BoomSpikeSlab", "doMC", "foreach"))
 
 # Load prediction
 load("../result/logit_spike_prediction.RData")
+# registerDoMC(min(detectCores()/2, length(prediction)))
+performance <- lapply(prediction, function(x) {
+  in_performance <- f_predictiveDiagnose(x[["in_pred_prob"]], x[["in_true"]])
+  out_performance <- f_predictiveDiagnose(x[["out_pred_prob"]], x[["out_true"]])
+  list(in_performance=in_performance, out_performance=out_performance)
+})
 
-performance <- foreach (i=(1:length(prediction))) %dopar% {
-  pred <- prediction[[i]]
-  in_performance <- f_predictiveDiagnose(pred[["in_pred_prob"]], pred[["in_true"]])
-  out_performance <- f_predictiveDiagnose(pred[["out_pred_prob"]], pred[["out_true"]])
-}
-print(xtable(sapply(Res, function(l) l[[1]]), digits=3),
-      file="../poster/in_sample_performance.tex",
+print(xtable(sapply(performance, function(x) x[[1]]), digits=3),
+      file="../writeup/fig/in_sample_performance.tex",
       floating=FALSE, floating.environment="center", table.placement=NULL)
-print(xtable(sapply(Res, function(l) l[[2]]), digits=3),
-      file="../poster/out_sample_performance.tex",
+print(xtable(sapply(performance, function(x) x[[2]]), digits=3),
+      file="../writeup/fig/out_sample_performance.tex",
       floating=FALSE, floating.environment="center", table.placement=NULL)
 
 # ROC curve
-data(crisp.data)
-data(cutoffs)
-cTRAIN <- crisp.data$date <= cutoffs$trainingend
-cTEST <- crisp.data$date >= cutoffs$teststart
 
-registerDoMC(length(cEOIs))
-cEOIplot <- c("insurgency", "dpc")
+lapply(seq_along(prediction), function(i) {
+  eoi <- names(prediction)[i]
 
-foreach (i=1:length(cEOIplot)) %dopar% {
-  eoi <- cEOIplot[i]
-  f_prepData(crisp.data, eoi, hier=TRUE, na_omit=FALSE)
-  model <- Res[[eoi]][[3]]
-  in_pred_prob <- apply(predict(model, newdata=get(eoi)[cTRAIN, ],
-                                burn=100, type="response", na.action=na.pass), 1, mean)
-  out_pred_prob <- apply(predict(model, newdata=get(eoi)[cTEST, ],
-                                 burn=100, type="response", na.action=na.pass), 1, mean)
-  in_true <- get(eoi)[cTRAIN, eoi]
-  out_true <- get(eoi)[cTEST, eoi]
-
-  in_pred <- prediction(in_pred_prob, in_true)
+  in_pred <- prediction(prediction[[i]]$in_pred_prob, prediction[[i]]$in_true)
   in_perf <- performance(in_pred,"tpr", "fpr")
-
-  out_pred <- prediction(out_pred_prob, out_true)
+  out_pred <- prediction(prediction[[i]]$out_pred_prob, prediction[[i]]$out_true)
   out_perf <- performance(out_pred, "tpr", "fpr")
+  filename <- paste0("../writeup/fig/roc_", eoi, ".pdf")
 
-  filename <- paste0("../poster/figures/roc_", eoi, ".pdf")
   pdf(filename, w=8, h=4)
   par(mfrow=c(1, 2))
-  plot(in_perf, colorize=TRUE, main="In-sample")
-  plot(out_perf, colorize=TRUE, main="Out-sample")
+  plot(in_perf, colorize=TRUE, main=paste(eoi, "In-sample"))
+  plot(out_perf, colorize=TRUE, main=paste(eoi, "Out-sample"))
   par(mfrow=c(1, 1))
   dev.off()
-}
+})
 
-pdf("../poster/figures/variable_selection.pdf", w=7, h=4)
-plot(Res[["insurgency"]][[3]], burn=100, inclusion.threshold=0.001,
-     main="Insurgency", cex.names=0.7)
-dev.off()
+# Plot variable selection result
+load("../result/logit_spike_result.RData")
+lapply(seq_along(Res), function(i) {
+  pdf(paste0("../writeup/fig/", names(Res)[i], "var.pdf"), w=7, h=4)
+  plot(Res[[i]]$model, burn=nburn, inclusion.threshold=0.001,
+       main=names(Res)[i], cex.names=0.7)
+  dev.off()
+})
+
