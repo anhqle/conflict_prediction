@@ -1,0 +1,14 @@
+# cd to the correct folder
+if (Sys.getenv("LOGNAME") == "anh") {
+  setwd("~/projects/conflict_prediction/R/")
+}
+
+rm(list=ls())
+source("functions.R")
+f_install_and_load(c("crisp.data.package", "plyr", "dplyr"))
+
+data(crisp.data)
+data(cutoffs)
+cTRAIN <- crisp.data$date <= cutoffs$trainingend
+cTEST <- crisp.data$date >= cutoffs$teststart
+
