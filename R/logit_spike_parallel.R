@@ -21,7 +21,7 @@ source("logit_spike_constants.R")
 Res <- foreach (i=(1:length(cEOIs))) %dopar% {
   eoi <- cEOIs[i]
   # Create data frame with relevant features
-  f_prepData(crisp.data, eoi, hier=TRUE, naOmit=FALSE, nextMonth=TRUE)
+  f_prepData(crisp.data, eoi, hier=FALSE, naOmit=FALSE, nextMonth=FALSE)
   cat(eoi, "prepping data done\n")
 
   # Train the model
@@ -34,5 +34,5 @@ Res <- foreach (i=(1:length(cEOIs))) %dopar% {
 
 names(Res) <- cEOIs
 str(Res, maxlevel=1)
-save(Res, file="../result/logit_spike_result_nextMonth.RData")
+save(Res, file="../result/logit_spike_result_nohier.RData")
 cat("Result saved \n")

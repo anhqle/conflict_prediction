@@ -9,7 +9,7 @@ source("logit_spike_constants.R")
 f_install_and_load(c("crisp.data.package", "xtable", "ROCR", "BoomSpikeSlab", "doMC", "foreach"))
 
 # Load prediction
-load("../result/logit_spike_prediction.RData")
+load("../result/logit_spike_prediction_nohier.RData")
 # registerDoMC(min(detectCores()/2, length(prediction)))
 performance <- lapply(prediction, function(x) {
   in_performance <- f_predictiveDiagnose(x[["in_pred_prob"]], x[["in_true"]])

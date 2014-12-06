@@ -14,7 +14,7 @@ cTRAIN <- crisp.data$date <= cutoffs$trainingend
 cTEST <- crisp.data$date >= cutoffs$teststart
 
 # Load the result
-load("../result/logit_spike_result_nextMonth.RData")
+load("../result/logit_spike_result_nohier.RData")
 
 f_predict <- function(model, newdata, nburn) {
   apply(predict(model, newdata=newdata,
@@ -25,7 +25,7 @@ registerDoMC(min(detectCores()/2, length(Res)))
 
 prediction <- foreach (i=(1:length(Res))) %dopar% {
   eoi <- names(Res)[i]
-  f_prepData(crisp.data, eoi, hier=TRUE, naOmit=FALSE, nextMonth=TRUE)
+  f_prepData(crisp.data, eoi, hier=FALSE, naOmit=FALSE, nextMonth=TRUE)
   cat(eoi, "preparing data done \n")
   in_pred_prob <- f_predict(model=Res[[i]], newdata=get(eoi)[cTRAIN, ], nburn=nburn)
   out_pred_prob <- f_predict(model=Res[[i]], newdata=get(eoi)[cTEST, ], nburn=nburn)
@@ -40,4 +40,4 @@ prediction <- foreach (i=(1:length(Res))) %dopar% {
 }
 
 names(prediction) <- names(Res)
-save(prediction, file="../result/logit_spike_prediction_nextMonth.RData")
+save(prediction, file="../result/logit_spike_prediction_nohier.RData")
