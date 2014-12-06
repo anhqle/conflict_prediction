@@ -4,7 +4,8 @@ f_install_and_load <- function(packs) {
   lapply(packs, library, character.only=TRUE)
 }
 
-f_prepData <- function(data, eoi, header=NULL, wantedColPosition=NULL, hier=FALSE, write=FALSE, filepath="", na_omit=TRUE) {
+f_prepData <- function(data, eoi, header=NULL, wantedColPosition=NULL, hier=FALSE,
+                       write=FALSE, naOmit=TRUE, nextMonth=FALSE, filepath="") {
   if (!is.null(header)) {
     # header is a string ("training", "testing")
     newDFName <- paste(eoi, header, sep="_")
@@ -14,12 +15,20 @@ f_prepData <- function(data, eoi, header=NULL, wantedColPosition=NULL, hier=FALS
 
   if (is.null(wantedColPosition)) {
     # Remove identifiers and only select lags
-    wantedColPosition <- grepl("^(?!ccode|cocom|crispname|iso|date|year|month|month.counter|monthID|insurgency|rebellion|dpc|erv|ic|coup).*[l0-9 ]$",
+    wantedColPosition <- grepl("^(?!ccode|cocom|crispname|iso|date|year|month|month.counter|monthID|insurgency|rebellion|dpc|erv|ic|coup|mp).*[l0-9 ]$",
                                names(crisp.data), perl=TRUE)
   }
 
-  # Create the new df
-  assign(newDFName, data.frame( data[ , eoi], data[ , wantedColPosition]), envir=.GlobalEnv)
+  # Create the new DF
+  # Predict nextMonth instead of current month
+  if (nextMonth == TRUE) {
+    assign(newDFName, data.frame( data[2:nrow(data), eoi],
+                                  data[1:(nrow(data)-1), wantedColPosition]), envir=.GlobalEnv)
+  } else {
+    assign(newDFName, data.frame( data[ , eoi],
+                                  data[ , wantedColPosition]), envir=.GlobalEnv)
+  }
+
   # Rename first column
   assign(newDFName, setNames(get(newDFName), c(eoi, colnames(data[ , wantedColPosition]))), envir=.GlobalEnv)
 
@@ -37,14 +46,19 @@ f_prepData <- function(data, eoi, header=NULL, wantedColPosition=NULL, hier=FALS
       country_var <- paste("country", country, sep="_")
       country_vars[i] <- country_var
       assign(country_var, as.numeric(data$country==country))
-      assign(newDFName, data.frame( get(newDFName), get(country_var) ), envir=.GlobalEnv)
+      if (nextMonth == FALSE) {
+        assign(newDFName, data.frame( get(newDFName), get(country_var) ), envir=.GlobalEnv)
+      } else {
+        assign(newDFName, data.frame( get(newDFName), get(country_var)[1:(nrow(data)-1)] ), envir=.GlobalEnv)
+      }
       i <- i + 1
     }
     assign(newDFName, setNames(get(newDFName), c(eoi, colnames(data[ , wantedColPosition]), country_vars)), envir=.GlobalEnv)
   }
-  if (na_omit == TRUE) {
+  if (naOmit == TRUE) {
     assign(newDFName, na.omit(get(newDFName)), envir=.GlobalEnv)
   }
+
   if (write == TRUE) {
     write.csv(get(newDFName), paste0(filepath, newDFName, ".csv"), row.names=FALSE)
   }

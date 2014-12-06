@@ -14,7 +14,7 @@ cTRAIN <- crisp.data$date <= cutoffs$trainingend
 cTEST <- crisp.data$date >= cutoffs$teststart
 
 # Load the result
-load("../result/logit_spike_result.RData")
+load("../result/logit_spike_result_nextMonth.RData")
 
 f_predict <- function(model, newdata, nburn) {
   apply(predict(model, newdata=newdata,
@@ -25,10 +25,10 @@ registerDoMC(min(detectCores()/2, length(Res)))
 
 prediction <- foreach (i=(1:length(Res))) %dopar% {
   eoi <- names(Res)[i]
-  f_prepData(crisp.data, eoi, hier=TRUE, na_omit=FALSE)
+  f_prepData(crisp.data, eoi, hier=TRUE, naOmit=FALSE, nextMonth=TRUE)
   cat(eoi, "preparing data done \n")
-  in_pred_prob <- f_predict(model=Res[[i]]$model, newdata=get(eoi)[cTRAIN, ], nburn=nburn)
-  out_pred_prob <- f_predict(model=Res[[i]]$model, newdata=get(eoi)[cTEST, ], nburn=nburn)
+  in_pred_prob <- f_predict(model=Res[[i]], newdata=get(eoi)[cTRAIN, ], nburn=nburn)
+  out_pred_prob <- f_predict(model=Res[[i]], newdata=get(eoi)[cTEST, ], nburn=nburn)
 
   in_true <- get(eoi)[cTRAIN, eoi]
   out_true <- get(eoi)[cTEST, eoi]
@@ -40,4 +40,4 @@ prediction <- foreach (i=(1:length(Res))) %dopar% {
 }
 
 names(prediction) <- names(Res)
-save(prediction, file="../result/logit_spike_prediction.RData")
+save(prediction, file="../result/logit_spike_prediction_nextMonth.RData")

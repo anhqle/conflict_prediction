@@ -16,11 +16,12 @@ cTEST <- crisp.data$date >= cutoffs$teststart
 # cEOIs <- c("insurgency", "rebellion", "dpc", "erv", "ic", "coup")
 cEOIs <- c("insurgency", "rebellion", "dpc", "erv", "mp")
 registerDoMC(min(detectCores()/2, length(cEOIs)))
-niter <- 5000 ; nburn <- 500
+
+source("logit_spike_constants.R")
 Res <- foreach (i=(1:length(cEOIs))) %dopar% {
   eoi <- cEOIs[i]
   # Create data frame with relevant features
-  f_prepData(crisp.data, eoi, hier=TRUE, na_omit=FALSE)
+  f_prepData(crisp.data, eoi, hier=TRUE, naOmit=FALSE, nextMonth=TRUE)
   cat(eoi, "prepping data done\n")
 
   # Train the model
@@ -28,22 +29,10 @@ Res <- foreach (i=(1:length(cEOIs))) %dopar% {
   assign(paste0("m_", eoi), logit.spike(formula, data=get(eoi)[cTRAIN, ], niter=niter))
   cat(eoi, "training done \n")
 
-  # Predict in of sample
-  # in_pred_prob <- apply(predict(get(paste0("m_", eoi)), newdata=get(eoi)[cTRAIN, ],
-  #                      burn=nburn, type="response", na.action=na.pass), 1, mean)
-  # cat(eoi, "in-sample predicting done \n")
-
-  # Predict out of sample
-  # out_pred_prob <- apply(predict(get(paste0("m_", eoi)), newdata=get(eoi)[cTEST, ],
-  #                     burn=nburn, type="response", na.action=na.pass), 1, mean)
-  # cat(eoi, "out-sample predicting done \n")
-
-  # Print precision and recall
-  # in_true <- get(eoi)[cTRAIN, eoi]
-  # out_true <- get(eoi)[cTEST, eoi]
-
-  list(model=get(paste0("m_", eoi)))
+  get(paste0("m_", eoi))
 }
 
 names(Res) <- cEOIs
-save(Res, file="../result/logit_spike_result.RData")
+str(Res, maxlevel=1)
+save(Res, file="../result/logit_spike_result_nextMonth.RData")
+cat("Result saved \n")
