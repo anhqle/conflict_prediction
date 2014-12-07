@@ -16,20 +16,33 @@ cTEST <- crisp.data$date >= cutoffs$teststart
 # Load the result
 load("../result/cart_result_nohier.RData")
 
-class(Res[[1]])
-
-prediction <- foreach (i=(1:length(Res))) %dopar% {
+# ---- Predict ----
+registerDoMC(min(detectCores()/2, length(Res)))
+pruned_prediction <- lapply(seq_along(Res), function(i) {
   eoi <- names(Res)[i]
   f_prepData(crisp.data, eoi, hier=FALSE, naOmit=FALSE, nextMonth=TRUE)
-  cat(eoi, "preparing data done \n")
-  in_pred_prob <- predict(model=Res[[i]], newdata=get(eoi)[cTRAIN, ])
-  out_pred_prob <- predict(model=Res[[i]], newdata=get(eoi)[cTEST, ])
+  traindata <- na.omit(get(eoi)[cTRAIN, ])
+  testdata <- na.omit(get(eoi)[cTEST, ])
+  print(ls())
+  cat("prep data done\n")
 
-  in_true <- get(eoi)[cTRAIN, eoi]
-  out_true <- get(eoi)[cTEST, eoi]
+  full_tree <- Res[[i]][["tree"]]
+  cv_tree <- cv.tree(full_tree, FUN=prune.misclass)
+  cat("cross validation done\n")
+  optimal_size <- cv_tree$size[which(cv_tree$dev == min(cv_tree$dev))]
+  print(optimal_size)
 
-  return(list(in_pred_prob=in_pred_prob,
-              out_pred_prob=out_pred_prob,
-              in_true=in_true,
-              out_true=out_true))
-}
+  pruned_tree <- prune.misclass(full_tree, best=optimal_size)
+  cat("pruning done \n")
+
+  in_pred <- predict(pruned_tree, newdata=traindata, type="class")
+  out_pred <- predict(pruned_tree, newdata=testdata, type="class")
+  cat("predicting done \n")
+
+  return(list(in_pred, out_pred))
+})
+
+names(pruned_prediction) <- names(Res)
+
+str(pruned_prediction)
+save(pruned_prediction, file="../result/cart_pruned_prediction_nohier.RData")

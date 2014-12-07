@@ -66,6 +66,62 @@ f_prepData <- function(data, eoi, header=NULL, wantedColPosition=NULL, hier=FALS
   cat(newDFName, "done \n")
 }
 
+f_prepDataLocal <- function(data, eoi, header=NULL, wantedColPosition=NULL, hier=FALSE,
+                       write=FALSE, naOmit=TRUE, nextMonth=FALSE, filepath="") {
+  if (is.null(wantedColPosition)) {
+    # Remove identifiers and only select lags
+    wantedColPosition <- grepl("^(?!ccode|cocom|crispname|iso|date|year|month|month.counter|monthID|insurgency|rebellion|dpc|erv|ic|coup|mp).*[l0-9 ]$",
+                               names(crisp.data), perl=TRUE)
+  }
+
+  # Create the new DF
+  # Predict nextMonth instead of current month
+  if (nextMonth == TRUE) {
+    newdf <-  data.frame( as.factor(data[2:nrow(data), eoi]),
+                          data[1:(nrow(data)-1), wantedColPosition])
+  } else {
+    newdf <- data.frame( as.factor(data[ , eoi]),
+                         data[ , wantedColPosition])
+  }
+
+  # Rename first column
+  newdf <- setNames(newdf, c(eoi, colnames(data[ , wantedColPosition])))
+
+  # Convert integer to numeric
+  integerToNumeric <- function(d) {
+    modifyList(d, lapply(d[ , sapply(d, is.integer)], as.numeric))
+  }
+  newdf <- integerToNumeric(newdf)
+
+  if (hier == TRUE) {
+    data$country <- gsub(pattern=",|-", rep="_", as.character(data$country))
+    country_vars <- rep(NA, length(unique(data$country)))
+    i <- 1
+    for (country in unique(data$country)) {
+      country_var <- paste("country", country, sep="_")
+      country_vars[i] <- country_var
+      assign(country_var, as.numeric(data$country==country))
+      if (nextMonth == FALSE) {
+        newdf <- data.frame( newdf, get(country_var) )
+      } else {
+        newdf <- data.frame( newdf, get(country_var)[1:(nrow(data)-1)] )
+      }
+      i <- i + 1
+    }
+    newdf <- setNames(newdf, c(eoi, colnames(data[ , wantedColPosition]), country_vars))
+  }
+  if (naOmit == TRUE) {
+    newdf <- na.omit(newdf)
+  }
+
+  if (write == TRUE) {
+    write.csv(newdf, paste0(filepath, eoi, ".csv"), row.names=FALSE)
+  }
+
+  return(newdf)
+  cat(eoi, "done \n")
+}
+
 f_brier <- function(pred_prob, true) mean((pred_prob - true)^2, na.rm=TRUE)
 f_auc <- function(pred_prob, true) somers2(pred_prob, true)["C"]
 f_precision <- function(pred, true) sum(pred == 1 & true == 1, na.rm=TRUE) / sum(pred == 1, na.rm=TRUE)
@@ -77,17 +133,6 @@ f_predictiveDiagnose <- function(pred_prob, true) {
            auc=f_auc(pred_prob, true),
            precision=f_precision(pred, true),
            recall=f_recall(pred, true)))
-}
-
-f_baselineComparison <- function(x, y){
-  .miss <- is.na(x)
-  .nObsThis <- sum(!.miss)
-  .baseModelThis <- rep(0, .nObsThis)
-  .xThis <- x[!.miss]
-  .yThis <- y[!.miss]
-  num.wrong <- .nObsThis-sum((.xThis>.5)*.yThis + (.xThis<.5)*(1-.yThis))
-  baseline.wrong <- .nObsThis-sum(.baseModelThis==.yThis)
-  (baseline.wrong - num.wrong)/baseline.wrong
 }
 
 f_roc <- function(model, data, eoi, cTRAIN=cTRAIN, cTEST=cTEST) {
