@@ -128,11 +128,17 @@ f_precision <- function(pred, true) sum(pred == 1 & true == 1, na.rm=TRUE) / sum
 f_recall <- function(pred, true) sum(pred == 1 & true == 1, na.rm=TRUE) / sum(true == 1, na.rm=TRUE)
 
 f_predictiveDiagnose <- function(pred_prob, true) {
-  pred <- ifelse(pred_prob >= 0.5, 1, 0)
-  return(c(brier=f_brier(pred_prob, true),
-           auc=f_auc(pred_prob, true),
-           precision=f_precision(pred, true),
-           recall=f_recall(pred, true)))
+  if (all(unique(pred_prob) %in% c(0, 1))) {
+    pred <- pred_prob
+    return(c(precision=f_precision(pred, true),
+             recall=f_recall(pred, true)))
+  } else {
+    pred <- ifelse(pred_prob >= 0.5, 1, 0)
+    return(c(brier=f_brier(pred_prob, true),
+             auc=f_auc(pred_prob, true),
+             precision=f_precision(pred, true),
+             recall=f_recall(pred, true)))
+  }
 }
 
 f_roc <- function(model, data, eoi, cTRAIN=cTRAIN, cTEST=cTEST) {

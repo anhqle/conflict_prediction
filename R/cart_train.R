@@ -19,12 +19,13 @@ Res <- foreach(i=(1:length(cEOIs)), .export="f_prepDataLocal") %dopar% {
   eoi <- cEOIs[i]
   # Create data frame with relevant features
   data <- f_prepDataLocal(crisp.data, eoi, hier=FALSE, naOmit=FALSE, nextMonth=FALSE)
+  traindata <- na.omit(data[cTRAIN, ])
   cat(eoi, "prepping data done\n")
 
   # Train the model
   formula <- as.formula(paste(eoi, "~ ."))
 
-  grown_tree <- tree(formula, data=na.omit(data[cTRAIN, ]))
+  grown_tree <- tree(formula, data=traindata)
   cat(eoi, "tree done\n")
 
   pruned_tree <- cv.tree(grown_tree, FUN=prune.misclass)
