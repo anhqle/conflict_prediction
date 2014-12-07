@@ -25,7 +25,7 @@ Res <- foreach (i=(1:length(cEOIs))) %dopar% {
   cat(eoi, "prepping data done\n")
 
   # Train the model
-  formula <- paste(eoi, "~ .")
+  formula <- as.formula(paste(eoi, "~ ."))
   assign(paste0("m_", eoi), logit.spike(formula, data=get(eoi)[cTRAIN, ], niter=niter))
   cat(eoi, "training done \n")
 

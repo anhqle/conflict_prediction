@@ -22,10 +22,10 @@ f_prepData <- function(data, eoi, header=NULL, wantedColPosition=NULL, hier=FALS
   # Create the new DF
   # Predict nextMonth instead of current month
   if (nextMonth == TRUE) {
-    assign(newDFName, data.frame( data[2:nrow(data), eoi],
+    assign(newDFName, data.frame( as.factor(data[2:nrow(data), eoi]),
                                   data[1:(nrow(data)-1), wantedColPosition]), envir=.GlobalEnv)
   } else {
-    assign(newDFName, data.frame( data[ , eoi],
+    assign(newDFName, data.frame( as.factor(data[ , eoi]),
                                   data[ , wantedColPosition]), envir=.GlobalEnv)
   }
 
