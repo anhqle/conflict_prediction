@@ -1,9 +1,9 @@
-\documentclass[12pt]{article}
+\documentclass{article}
 % This first part of the file is called the PREAMBLE. It includes
 % customizations and command definitions. The preamble is everything
 % between \documentclass and \begin{document}.
+\usepackage{final_project,times}
 
-\usepackage[margin=1in]{geometry}  % set the margins to 1in on all sides
 \usepackage{graphicx}              % to include figures
 \usepackage{amsmath}               % great math stuff
 \usepackage{amsfonts}              % for blackboard bold, etc
@@ -51,10 +51,18 @@
 \bibpunct{(}{)}{;}{a}{}{,} % no comma between author and year
 
 \title{Conflict Prediction with Spike and Slab prior}
-\author{Anh Le}
+\author{Anh Le\\
+Department of Political Science\\
+Duke University\\
+\texttt{anh.le@duke.edu} \\}
 
+\nipsfinalcopy
 \begin{document}
 \maketitle
+
+\begin{abstract}
+My abstract
+\end{abstract}
 
 \section*{Introduction}
 
@@ -84,34 +92,34 @@ These models are found to perform better than existing models used in our lab.\f
 \section{Spike-and-Slab}
 
 \subsection{Model building}
-I pre-process the data by removing extraneous variables (country names, time ID, etc.) and, for each country in the dataset, add a binary variable that indicates whether an observation belongs to a country. This allows the model to have different intercepts for each country, essentially adding country fixed effect.
+I pre-process the data by adding a binary variable that indicates whether an observation belongs to a country. This allows the model to have different intercepts for each country, essentially adding country fixed effect.
 
-I fit the logistic model with spike-and-slab prior using the package \verb|BoomSpikeSlab|. To simultaneously fit one model for each of my five labels, I use packages \verb|doMC| and \verb|foreach|. 
+I fit the spike-and-slab model using the package \verb|BoomSpikeSlab|, running a MCMC chain with $\text{iterations}=5000$ and $\text{burn-in}=500$. 
 
 \subsection*{Result}
 
-The results below come from a MCMC chain with $\text{iterations}=1000$ and $\text{burn-in}=100$. Even though the MCMC chain is not that long, due to the size of the dataset the computational time is already over 1.5 hour. 
 
-
-
-\begin{figure}
-\includegraphics[width=\textwidth]{fig/roc_insurgency}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\textwidth]{fig/roc_mp}
-\end{figure}
-
-\begin{table}
+\begin{table}[H]
 \centering
 \input{fig/in_sample_performance}
 \caption{In-sample predictive performance}
 \end{table}
 
-\begin{table}
+\begin{table}[H]
 \centering
 \input{fig/out_sample_performance}
 \caption{Out-sample predictive performance}
 \end{table}
+
+
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{fig/roc_insurgency}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{fig/roc_mp}
+\end{figure}
+
 
 \end{document}
