@@ -58,17 +58,39 @@
 
 \section*{Introduction}
 
-Being able to predict conflict is very useful for governments and international organizations to deploy their limited resources effectively. Therefore, this project will try to predict the (binary) presence of four events (i.e. insurgency, rebellion, dpc--domestic political crisis, and erv--ethnic and religious violence). I use monthly data of 167 countries from 2001 to present (dimension = $27,000 \times 550$). The feature variables include each country's politics, economic performance, financial status, and their 2-month lags.
+Being able to predict political violence is very useful for governments and international organizations to deploy their limited resources effectively. Traditional models of violence in political science have relied on frequentist panel data methods, which have not had good predictive performance because:
+\begin{itemize}
+\item The null hypothesis of $\beta = 0$ being tested is not as important as the substantive effect of the variable
+\item Many social science variables are highly correlated. For example, \textit{competitive elections}, \textit{civil liberties}, and \textit{property rights} are three conceptually distinct but empirically correlated variables. This results in (logistic) regression with large coefficient variance and meaningless p-value
+\item The problem of collinearity is compounded by the recent explosion of data available, with hundreds of predictors to be considered
+\end{itemize}
 
-The project will use logistic regression with spike-and-slab prior to choose a small subset of variables. This will isolate important predictive factors, facilitating model interpretation. Given high correlations between temporally lagged variables, sparse regression will also avoid over-fitting. I will compare the predictive accuracy of this model against others currently used in our lab.
+Therefore, this project will use two methods that work well given the large number of predictors:
+\begin{enumerate}
+\item sparse regression with spike-and-slab prior
+\item (boosted) classification tree
+\end{enumerate}
 
-\section*{Analysis}
+These models are found to perform better than existing models used in our lab.\footnote{We currently use hierarchical linear mixed-effect models, combined together with Bayesian ensemble. The predictors are hand-picked.}
 
+\section{Description of Data}
+
+\textbf{The dataset} contains monthly data of 167 countries from 2001 to present (dimension = $27,000 \times 550$). The training cutoff date is \verb|2013-06-01|.\footnote{This cutoff date is to comply with existing models used in our lab.}
+
+\textbf{The labels} are binary indicators of whether an event happens. We are interested in five types of events: insurgency, rebellion, dpc (domestic political crisis), erv (ethnic and religious violence), and mp (massive protest).
+
+\textbf{The predictors} include a country's politics, economics, and financial status. I also include spatial lags (constructed from Gower similarity, 4 nearest neighbors, and centroid distance) and temporal lags (by up to 2 months).
+
+\section{Spike-and-Slab}
+
+\subsection{Model building}
 I pre-process the data by removing extraneous variables (country names, time ID, etc.) and, for each country in the dataset, add a binary variable that indicates whether an observation belongs to a country. This allows the model to have different intercepts for each country, essentially adding country fixed effect.
 
-I fit the logistic model with spike-and-slab prior using the package \verb|BoomSpikeSlab|. To simultaneously fit four models for my four response variables, I use packages \verb|doMC| and \verb|foreach|. 
+I fit the logistic model with spike-and-slab prior using the package \verb|BoomSpikeSlab|. To simultaneously fit one model for each of my five labels, I use packages \verb|doMC| and \verb|foreach|. 
 
-The model is trained on March2001-June 2013 data and tested on July2013-Sept2014 data. The results below come from a MCMC chain with $\text{iterations}=1000$ and $\text{burn-in}=100$. Even though the MCMC chain is not that long, due to the size of the dataset the computational time is already over 1.5 hour. 
+\subsection*{Result}
+
+The results below come from a MCMC chain with $\text{iterations}=1000$ and $\text{burn-in}=100$. Even though the MCMC chain is not that long, due to the size of the dataset the computational time is already over 1.5 hour. 
 
 
 
