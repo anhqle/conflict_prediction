@@ -21,3 +21,14 @@ data/*
 
 # Misc
 *.pptx
+
+# Latex
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.synctex.gz
+*.synctex.gz(busy)
