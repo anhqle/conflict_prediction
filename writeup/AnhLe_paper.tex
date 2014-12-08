@@ -56,6 +56,22 @@
 \begin{document}
 \maketitle
 
+\section*{Introduction}
+
+Being able to predict conflict is very useful for governments and international organizations to deploy their limited resources effectively. Therefore, this project will try to predict the (binary) presence of four events (i.e. insurgency, rebellion, dpc--domestic political crisis, and erv--ethnic and religious violence). I use monthly data of 167 countries from 2001 to present (dimension = $27,000 \times 550$). The feature variables include each country's politics, economic performance, financial status, and their 2-month lags.
+
+The project will use logistic regression with spike-and-slab prior to choose a small subset of variables. This will isolate important predictive factors, facilitating model interpretation. Given high correlations between temporally lagged variables, sparse regression will also avoid over-fitting. I will compare the predictive accuracy of this model against others currently used in our lab.
+
+\section*{Analysis}
+
+I pre-process the data by removing extraneous variables (country names, time ID, etc.) and, for each country in the dataset, add a binary variable that indicates whether an observation belongs to a country. This allows the model to have different intercepts for each country, essentially adding country fixed effect.
+
+I fit the logistic model with spike-and-slab prior using the package \verb|BoomSpikeSlab|. To simultaneously fit four models for my four response variables, I use packages \verb|doMC| and \verb|foreach|. 
+
+The model is trained on March2001-June 2013 data and tested on July2013-Sept2014 data. The results below come from a MCMC chain with $\text{iterations}=1000$ and $\text{burn-in}=100$. Even though the MCMC chain is not that long, due to the size of the dataset the computational time is already over 1.5 hour. 
+
+
+
 \begin{figure}
 \includegraphics[width=\textwidth]{fig/roc_insurgency}
 \end{figure}
