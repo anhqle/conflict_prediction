@@ -1,15 +1,9 @@
 \documentclass{article}
-% This first part of the file is called the PREAMBLE. It includes
-% customizations and command definitions. The preamble is everything
-% between \documentclass and \begin{document}.
+
 \usepackage{final_project,times}
-
-\usepackage{graphicx}              % to include figures
-\usepackage{amsmath}               % great math stuff
-\usepackage{amsfonts}              % for blackboard bold, etc
-\usepackage{amsthm}                % better theorem environments
-
-\usepackage{rotating} % for sideway table
+\usepackage{graphicx}
+\usepackage{amsmath, amsfonts, amsthm}
+\usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{hyperref}
 \hypersetup{
@@ -21,36 +15,15 @@
 \usepackage{cleveref}
 
 \usepackage{array,tabularx}
-
-\newenvironment{conditions*}
-  {\par\vspace{\abovedisplayskip}\noindent
-   \tabularx{\columnwidth}{>{$}l<{$} @{${}={}$} >{\raggedright\arraybackslash}X}}
-  {\endtabularx\par\vspace{\belowdisplayskip}}
-  
+\usepackage{subfig}
 \usepackage{float}
 \restylefloat{table}
-
-% various theorems, numbered by section
-
-\newtheorem{thm}{Theorem}[section]
-\newtheorem{lem}[thm]{Lemma}
-\newtheorem{prop}[thm]{Proposition}
-\newtheorem{cor}[thm]{Corollary}
-\newtheorem{conj}[thm]{Conjecture}
-
-\DeclareMathOperator{\id}{id}
-
-\newcommand{\bd}[1]{\mathbf{#1}}  % for bolding symbols
-\newcommand{\RR}{\mathbb{R}}      % for Real numbers
-\newcommand{\ZZ}{\mathbb{Z}}      % for Integers
-\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
-\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
 
 % bibliography
 \usepackage{natbib}
 \bibpunct{(}{)}{;}{a}{}{,} % no comma between author and year
 
-\title{Conflict Prediction with Spike and Slab prior}
+\title{Spike-and-Slab model \& Boosted Tree to Predict Conflict}
 \author{Anh Le\\
 Department of Political Science\\
 Duke University\\
@@ -60,14 +33,11 @@ Duke University\\
 \begin{document}
 \maketitle
 
-\begin{abstract}
-My abstract
-\end{abstract}
-
 \section*{Introduction}
 
 Being able to predict political violence is very useful for governments and international organizations to deploy their limited resources effectively. Traditional models of violence in political science have relied on frequentist panel data methods, which have not had good predictive performance because:
-\begin{itemize}
+
+\begin{itemize}[noitemsep]
 \item The null hypothesis of $\beta = 0$ being tested is not as important as the substantive effect of the variable
 \item Many social science variables are highly correlated. For example, \textit{competitive elections}, \textit{civil liberties}, and \textit{property rights} are three conceptually distinct but empirically correlated variables. This results in (logistic) regression with large coefficient variance and meaningless p-value
 \item The problem of collinearity is compounded by the recent explosion of data available, with hundreds of predictors to be considered
@@ -92,34 +62,130 @@ These models are found to perform better than existing models used in our lab.\f
 \section{Spike-and-Slab}
 
 \subsection{Model building}
-I pre-process the data by adding a binary variable that indicates whether an observation belongs to a country. This allows the model to have different intercepts for each country, essentially adding country fixed effect.
+I pre-process the data by adding a binary variable that indicates whether an observation belongs to a country. This allows the model to have different intercepts for each country, essentially adding country fixed effect. The spike-and-slab model is fit with the package \verb|BoomSpikeSlab|, running a MCMC chain with $\text{iterations}=5000$ and $\text{burn-in}=500$. 
 
-I fit the spike-and-slab model using the package \verb|BoomSpikeSlab|, running a MCMC chain with $\text{iterations}=5000$ and $\text{burn-in}=500$. 
+\subsection{Result}
 
-\subsection*{Result}
+\autoref{tab:spikeslab_insample} and \autoref{tab:spikeslab_outsample} summarizes the predictive performance of my model. The spike-and-slab model performs well on \verb|insurgency, rebellion, and ethnic violence| (97.6\% precision and 94.6\% recall out of sample), but not well on \verb|domestic crisis| and \verb|massive protest|. \autoref{fig:spikeslab_roc_insurgency} and \autoref{fig:spikeslab_roc_dpc} visualizes this performance discrepancy with ROC curves.
 
+Table \autoref{tab:spikeslab_outsample} and \autoref{tab:ebma_outsample} shows that the spike-and-slab model perform better across labels in comparison with the ensemble model currently used in my lab.
 
 \begin{table}[H]
 \centering
-\input{fig/in_sample_performance}
+\input{tab/spikeslab_in_sample}
 \caption{In-sample predictive performance}
+\label{tab:spikeslab_insample}
 \end{table}
 
 \begin{table}[H]
 \centering
-\input{fig/out_sample_performance}
-\caption{Out-sample predictive performance}
+\subfloat[Spike-and-Slab]{\label{tab:spikeslab_outsample}
+	\input{tab/spikeslab_out_sample}}
+\subfloat[Ensemble Linear Mixed Effect]{\label{tab:ebma_outsample}
+	\input{tab/ebma_performance}}
+\caption{Table \autoref{tab:spikeslab_outsample} shows the out-sample performance of the Spike-and-Slab model, which performs better (according to Brier and AUC score) than the currently used Ensemble model in Table \autoref{tab:ebma_outsample}}
 \end{table}
 
-
-
 \begin{figure}[H]
-\includegraphics[width=\textwidth]{fig/roc_insurgency}
+\includegraphics[width=\textwidth]{fig/spikeslab_roc_insurgency}
+\caption{ROC curve of insurgency prediction}
+\label{fig:spikeslab_roc_insurgency}
 \end{figure}
 
-\begin{figure}[H]
-\includegraphics[width=\textwidth]{fig/roc_mp}
-\end{figure}
+%\begin{figure}[H]
+%\includegraphics[width=\textwidth]{fig/spikeslab_roc_dpc}
+%\caption{ROC curve of domestic crisis prediction}
+%\label{fig:spikeslab_roc_dpc}
+%\end{figure}
+%
+%However, looking at \autoref{fig:spikeslab_insurgencyvar}, it becomes clear that most of the predictive performance comes from the country dummies. This is because some countries almost always experience insurgency, while some other countries almost never, so it is safe to predict that these countries will follow the same pattern in the future. Therefore, even though the model has excellent performance, it is not necessarily revealing important factors that predict insurgency.
+%
+%\begin{figure}[H]
+%\includegraphics[width=\textwidth]{fig/spikeslab_insurgencyvar}
+%\caption{The left figure lists all the variables. The spike-and-slab model selects only a very small subset of the predictors. The right figure lists the variables with inclusion probability larger than 0.001. The majority of these predictors are country dummies.}
+%\label{fig:spikeslab_insurgencyvar}
+%\end{figure}
+%
+%Indeed, without the country dummies, the model performance deteriorates sharply. \autoref{fig:nohierspikeslab_insurgencyvar} in the Appendix shows the variables selected when there is no country dummy.
+%
+%\begin{table}[H]
+%\centering
+%\begin{tabular}{c}
+%\subfloat[With country dummies]{\label{tab:withhierspikeslab_outsample}
+%	\input{tab/spikeslab_out_sample}}\\
+%\subfloat[Without country dummies]{\label{tab:nohierspikeslab_outsample}
+%	\input{tab/nohierspikeslab_out_sample}}
+%\end{tabular}
+%\caption{Table \autoref{tab:nohierspikeslab_outsample} shows the out-sample performance of the Spike-and-Slab model without country dummies, which performs much worse.}
+%\end{table}
 
+%\section{Tree-based model}
+%
+%\subsection{Model building}
+%
+%Since the spike-and-slab model does not work well without country dummies, in this section I will try tree-based model. From now on, I will also use a month's predictors to predict \textit{next month}'s event instead.\footnote{I am not sure why our lab is ``predicting'' a month's event with the predictors of the current month. This seems to defeat the purpose of predicting conflict in advance in order to better prepare for it.}
+%
+%\begin{itemize}[noitemsep]
+%\item Classification tree with pruning via cross-validation
+%\item Boosted tree, with 
+%\begin{itemize}[noitemsep]
+%\item \text{tree.complexity} = 1
+%\item learning.rate = 0.01
+%\item bag.fraction = 0.75	
+%\item 10-fold cross-validation
+%\end{itemize}
+%\end{itemize}
+%
+%\subsection{Classification tree result}
+%
+%Table \autoref{tab:cart_in_sample} and \autoref{tab:cart_out_sample} show the predictive performance of pruned tree. There is not much improvement over spike-and-slab model. \autoref{fig:insurgency_tree} shows the decision tree for predicting insurgency.							
+%
+%\begin{table}[H]
+%\centering
+%\begin{tabular}{c}
+%\subfloat[In-Sample]{\label{tab:cart_in_sample}
+%	\input{tab/cart_in_sample}}\\
+%\subfloat[Out-Sample]{\label{tab:cart_out_sample}
+%	\input{tab/cart_out_sample}}
+%\end{tabular}
+%\caption{In- and Out-Sample performance of decision tree}
+%\end{table}
+%
+%\begin{figure}[H]
+%\includegraphics[width=\textwidth]{fig/insurgency_tree}
+%\caption{The decision tree to predict insurgency. Left: full tree. Right: pruned tree}
+%\label{fig:insurgency_tree}
+%\end{figure}
+%
+%\subsection{Boosted tree result}
+%
+%Table \autoref{tab:boosting_insample} and \autoref{tab:boosting_outsample} shows the predictive performance of boosted classification tree, which is substantially better than individual tree. The precision and recall improves by 15 - 30 \% for \verb|insurgency, rebellion, ethnic violence|. Most dramatically is the improvement in prediction for \verb|domestic crisis|, which goes from 14\% to 65\% in precision, and from 4.2\% to 22\% in recall.
+%
+%\begin{table}[H]
+%\centering
+%\begin{tabular}{c}
+%\subfloat[In-Sample]{\label{tab:boosting_insample}
+%	\input{tab/boosting_insample}}\\
+%\subfloat[Out-Sample]{\label{tab:boosting_outsample}
+%	\input{tab/boosting_outsample}}
+%\end{tabular}
+%\caption{In- and Out-Sample predictive performance of Boosted Classification Tree}
+%\end{table}
+%
+%\section{Conclusion}
+%
+%In this project I predict conflict event with two methods that work well in high-dimensional data: 1) Spike-and-Slab variable selection, and 2) (Boosted) Classification Tree. In both cases, out-sample predictive performance is only slightly worse than in-sample performance, suggesting that the two method successfully avoid overfitting.
+%
+%The Spike-and-Slab model also reveals the important factor of country dummies in predicting conflict event. It shows that the existing models have excellent performance (up to 97\% precision and 94\% recall on \verb|insurgency|) simply because some countries always (never) have conflict events. Once the country dummies are taken out, the Spike-and-Slab model performs much worse.
+%
+%Finally, I use (boosted) classification tree and get a substantially better result even without country dummies.
+%
+%\section{Appendix}
+%
+%\begin{figure}
+%\includegraphics[width=\textwidth]{fig/nohierspikeslab_insurgencyvar}
+%\caption{Variable Selection when there is no country dummies}
+%\label{fig:nohierspikeslab_insurgencyvar} 
+%\end{figure}
 
 \end{document}

@@ -47,7 +47,8 @@ for (i in seq_along(Res)) {
   out_true <- testdata[ , eoi]
 
   pruned_prediction[[i]] <- list(in_pred=in_pred, out_pred=out_pred,
-                                 in_true=in_true, out_true=out_true)
+                                 in_true=in_true, out_true=out_true,
+                                 pruned_tree=pruned_tree)
 }
 
 names(pruned_prediction) <- names(Res)

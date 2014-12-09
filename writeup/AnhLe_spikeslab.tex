@@ -16,6 +16,8 @@
 \usepackage{amsfonts, amsmath, amsthm, amssymb} % For math fonts, symbols and environments
 \usepackage{wrapfig} % Allows wrapping text around tables and figures
 
+\usepackage{subcaption}
+
 \usepackage{hyperref}
 \hypersetup{
     colorlinks,
@@ -116,12 +118,12 @@ The model is trained on March2001-June 2013 data and tested on July2013-Sept2014
 \label{tab:out_sample_old_ebma_performance}
 \end{center}
 
-\autoref{tab:out_sample_old_benchmark_performance} shows performance benchmark from other labs. Again, my new model performs better than this benchmark, with the exception of recall on \textit{erv (Ethnic Violence)}
-\begin{center}
-\input{benchmark_performance}
-\captionof{table}{Out sample benchmark (old) performance}
-\label{tab:out_sample_old_benchmark_performance}
-\end{center}
+%\autoref{tab:out_sample_old_benchmark_performance} shows performance benchmark from other labs. Again, my new model performs better than this benchmark, with the exception of recall on \textit{erv (Ethnic Violence)}
+%\begin{center}
+%\input{benchmark_performance}
+%\captionof{table}{Out sample benchmark (old) performance}
+%\label{tab:out_sample_old_benchmark_performance}
+%\end{center}
 
 \begin{center}
 \includegraphics[width=0.5\textwidth]{roc_insurgency}
