@@ -147,7 +147,7 @@ Since the spike-and-slab model does not work well without country dummies, in th
 
 Table \autoref{tab:cart_in_sample} and \autoref{tab:cart_out_sample} show the predictive performance of pruned tree. There is not much improvement over spike-and-slab model. \autoref{fig:insurgency_tree} shows the decision tree for predicting insurgency.							
 
-\begin{table}[H]
+\begin{table}[!ht]
 \centering
 \begin{tabular}{c}
 \subfloat[In-Sample]{\label{tab:cart_in_sample}
@@ -158,7 +158,7 @@ Table \autoref{tab:cart_in_sample} and \autoref{tab:cart_out_sample} show the pr
 \caption{In- and Out-Sample performance of decision tree}
 \end{table}
 
-\begin{figure}[H]
+\begin{figure}[!ht]
 \includegraphics[width=\textwidth]{fig/insurgency_tree}
 \caption{The decision tree to predict insurgency. Left: full tree. Right: pruned tree}
 \label{fig:insurgency_tree}
@@ -168,7 +168,7 @@ Table \autoref{tab:cart_in_sample} and \autoref{tab:cart_out_sample} show the pr
 
 Table \autoref{tab:boosting_insample} and \autoref{tab:boosting_outsample} shows the predictive performance of boosted classification tree, which is substantially better than individual tree. The precision and recall improves by 15 - 30 \% for \verb|insurgency, rebellion, ethnic violence|. Most dramatically is the improvement in prediction for \verb|domestic crisis|, which goes from 14\% to 65\% in precision, and from 4.2\% to 22\% in recall.
 
-\begin{table}[H]
+\begin{table}[!ht]
 \centering
 \begin{tabular}{c}
 \subfloat[In-Sample]{\label{tab:boosting_insample}
@@ -185,5 +185,5 @@ In this project I predict conflict event with two methods that work well in high
 
 The Spike-and-Slab model also reveals the important factor of country dummies in predicting conflict event. It shows that the existing models have excellent performance (up to 97\% precision and 94\% recall on \verb|insurgency|) simply because some countries always (never) have conflict events. Once the country dummies are taken out, the Spike-and-Slab model performs much worse.
 
-Finally, I use (boosted) classification tree and get a substantially better result even without country dummies.
+Finally, when there is no country dummy, (boosted) classification tree performs substantially better than single tree and spike-and-slab model.
 \end{document}
