@@ -12,7 +12,7 @@ cEOIs <- c("insurgency", "rebellion", "dpc", "erv", "mp")
 registerDoMC(min(detectCores()/2, length(cEOIs)))
 Res <- foreach(i=(1:length(cEOIs))) %dopar% {
   eoi <- cEOIs[i]
-  data <- f_prepDataLocal(crisp.data, eoi, hier=FALSE, naOmit=FALSE, nextMonth=TRUE)
+  data <- f_prepDataLocal(crisp.data, eoi, hier=FALSE, naOmit=FALSE, nextMonth=FALSE)
   cat(eoi, "prepping data done\n")
   traindata <- na.omit(data[cTRAIN, ])
   traindata[,1] <- as.numeric(as.character(traindata[,1]))

@@ -12,7 +12,7 @@ load("../result/boosting_result_nohier.RData")
 registerDoMC(min(detectCores()/2, length(Res)))
 boosting_prediction <- foreach (i=(1:length(Res))) %dopar% {
   eoi <- names(Res)[i]
-  f_prepData(crisp.data, eoi, hier=FALSE, naOmit=FALSE, nextMonth=TRUE)
+  f_prepData(crisp.data, eoi, hier=FALSE, naOmit=FALSE, nextMonth=FALSE)
   cat(eoi, "preparing data done \n")
 
   boosted_tree <- Res[[i]]$boosted_tree
