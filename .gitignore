@@ -32,3 +32,8 @@ data/*
 *.toc
 *.synctex.gz
 *.synctex.gz(busy)
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
