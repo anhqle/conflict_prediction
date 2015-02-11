@@ -17,9 +17,9 @@ performance <- lapply(boosting_prediction, function(x) {
   list(in_performance=in_performance, out_performance=out_performance)
 })
 
-print(xtable(sapply(performance[1:4], function(x) x[[1]]), digits=3),
+print(xtable(sapply(performance, function(x) x[[1]]), digits=3),
       file="../writeup/tab/boosting_insample.tex",
       floating=FALSE, floating.environment="center", table.placement=NULL)
-print(xtable(sapply(performance[1:4], function(x) x[[2]]), digits=3),
+print(xtable(sapply(performance, function(x) x[[2]]), digits=3),
       file="../writeup/tab/boosting_outsample.tex",
       floating=FALSE, floating.environment="center", table.placement=NULL)
