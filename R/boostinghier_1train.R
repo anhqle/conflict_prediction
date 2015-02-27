@@ -27,5 +27,5 @@ Res <- foreach(i=(1:length(cEOIs))) %dopar% {
 }
 names(Res) <- cEOIs
 str(Res, maxlevel=1)
-save(Res, file="../result/boosting_result_nohier.RData")
+save(Res, file="../result/boosting_result_withhier.RData")
 cat("Result saved \n")
