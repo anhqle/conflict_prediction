@@ -1,4 +1,4 @@
-conflict_prediction
+Conflict Prediction with Machine Learning
 ===================
 
 Through Ward Lab at Duke University, this project is part of the Integrated Conflict Early Warning System (ICEWS), a Defense Advanced Research Projects Agency's (DARPA) program. The goal of ICEWS was to develop and integrate multiple data feeds and analytic models to generate reliable forecasts of violence and upheaval around the world.
